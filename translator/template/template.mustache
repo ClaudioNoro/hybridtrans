@@ -1,0 +1,58 @@
+{{summaryPlaceholder}}{{extendedSummaryPlaceholder}}
+ {{! Check if parameters exist and render the parameters block if true }}
+{{#parametersExist}}
+ 
+Arg:
+----
+{{#args}}
+- {{var}} (`{{{typePlaceholder}}}`): {{{descriptionPlaceholder}}}
+{{/args}}
+{{#kwargs}}
+- {{var}} (`{{{typePlaceholder}}}`, optional): {{{descriptionPlaceholder}}}. Defaults to {{&default}}.
+{{/kwargs}}
+{{/parametersExist}}
+{{! Check if returns exist and render the returns block if true }}
+{{#returnsExist}}
+ 
+Return:
+-------
+{{#returns}}
+- `{{{typePlaceholder}}}`: {{{descriptionPlaceholder}}}
+{{/returns}}
+{{/returnsExist}}
+{{! Check if exceptions exist and render the exceptions block if true }}
+{{#exceptionsExist}}
+ 
+Raise:
+------
+{{#exceptions}}
+- `{{{typePlaceholder}}}`: {{{descriptionPlaceholder}}}
+{{/exceptions}}
+{{/exceptionsExist}}
+{{! Check if yields exist and render the yields block if true }}
+{{#yieldsExist}}
+ 
+Yield:
+------
+{{#yields}}
+- `{{{typePlaceholder}}}`: {{{descriptionPlaceholder}}}
+{{/yields}}
+{{/yieldsExist}}
+{{! Check if FR exist and render the FR block if true }}
+{{#FRExist}}
+ 
+FR:
+---
+{{#FR}}
+- `{{{typePlaceholder}}}`: {{{descriptionPlaceholder}}}
+{{/FR}}
+{{/FRExist}}
+{{! Check if SRS exist and render the SRS block if true }}
+{{#SRSExist}}
+ 
+SRS:
+----
+{{#SRS}}
+- `{{{typePlaceholder}}}`: {{{descriptionPlaceholder}}}
+{{/SRS}}
+{{/SRSExist}}

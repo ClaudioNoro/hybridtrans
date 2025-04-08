@@ -1,0 +1,4 @@
+exclude env/*
+exclude tests/*
+exclude *.pyc
+exclude __pycache__/

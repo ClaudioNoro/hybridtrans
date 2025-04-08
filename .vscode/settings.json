@@ -1,0 +1,63 @@
+{
+    "pylint.args": [
+        "--function-rgx=(^[_a-z][_a-z0-9]*$)",
+        "--method-rgx=(^[_a-z][_a-z0-9]*$)",
+        "--variable-naming-style=snake_case",
+        "--module-naming-style=PascalCase",
+        "--const-naming-style=UPPER_CASE",
+        "--class-naming-style=PascalCase",
+        "--attr-naming-style=snake_case",
+        "--argument-naming-style=snake_case",
+        "--class-attribute-naming-style=snake_case",
+        "--inlinevar-naming-style=snake_case"
+    ],
+    "pylint.severity": {
+        "convention": "Information",
+        "error": "Error",
+        "fatal": "Error",
+        "refactor": "Warning",
+        "warning": "Warning",
+        "info": "Information"
+    },
+    "python.analysis.typeCheckingMode": "off",
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportAttributeAccessIssue": "warning",
+        "reportPrivateUsage": "warning"
+    },
+    "autoDocstring.customTemplatePath": "translator\\template\\template.mustache",
+    "python.defaultInterpreterPath": "${workspaceFolder}\\env\\Scripts\\python.exe",
+    "flake8.args": [
+        "--max-line-length=200",
+        "--ignore=E501",
+        "--per-file-ignore=__init__.py:F401"
+    ],
+    "autopep8.args": [
+        "--max-line-length=200",
+        "--ignore=E501"
+    ],
+    "markdownlint.config": {
+        "MD024": false,
+        "MD033": {
+            "allowed_elements": [
+                "div",
+                "img",
+                "br",
+                "span"
+            ]
+        }
+    },
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit",
+        "source.fixAll.pylint": "explicit"
+    },
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.formatting.provider": "autopep8",
+    "python.formatting.args": [
+        "--max-line-length=200",
+        "--ignore=E501"
+    ],
+    "python.envFile": "${workspaceFolder}/.env",
+    "autoDocstring.generateDocstringOnEnter": true
+}
