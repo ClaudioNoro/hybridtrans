@@ -1,3 +1,4 @@
+"""Text handling utilities for translation tasks."""
 import json
 import re
 from typing import List
@@ -27,8 +28,9 @@ def define_keywords(text: str, pattern: str) -> List[str]:
 
     Args:
         text (str): The input text to search in.
-        pattern (str): A regex pattern to match keywords (e.g., r"[A-Z]{2,}" for uppercase keywords,
-         \nr"\{.*?\}" for keywords surrounded by curly braces:{example}).
+        pattern (str): A regex pattern to match keywords (e.g., r"[A-Z]{2,}" \
+            for uppercase keywords,
+             r"\{.*?\}" for keywords surrounded by curly braces:{example}).
 
     Returns:
         List[str]: A list of unique keywords found in the text.
@@ -36,7 +38,6 @@ def define_keywords(text: str, pattern: str) -> List[str]:
     matches = re.findall(pattern, text)
     # Remove duplicates while preserving order
     return list(dict.fromkeys(matches))
-
 
 
 def segment_text(text: str, max_sentences: int = 100) -> List[str]:
@@ -50,7 +51,7 @@ def segment_text(text: str, max_sentences: int = 100) -> List[str]:
     """
     blob = TextBlob(text)
     sentences = [str(sentence) for sentence in blob.sentences]
-    return sentences
+    return sentences[:max_sentences]
 
 
 # mais liberdade keyword {[]}
@@ -69,14 +70,15 @@ def protect_keywords(text: str, keywords: List[str]) -> str:
         str: Text with protected placeholders.
     """
     for idx, keyword in enumerate(keywords, start=1):
-        placeholder = f"__{idx}__" 
+        placeholder = f"__{idx}__"
         text = text.replace(keyword, placeholder)
     return text
 
 
 def restore_keywords(text: str, keywords: List[str]) -> str:
     """
-    Replaces numbered placeholders (__1__, __2__, ...) with the original keywords.
+    Replaces numbered placeholders (__1__, __2__, ...) \
+        with the original keywords.
 
     Args:
         text (str): Text after translation.
@@ -106,7 +108,8 @@ def normalize_text(text: str) -> str:
 
 
 def log_translation(
-    original_text: str, translated_text: str, log_path: str = "translation_log.txt"
+    original_text: str, translated_text: str,
+    log_path: str = "translation_log.txt"
 ) -> None:
     """
     Appends original and translated text to a log file.
@@ -125,6 +128,7 @@ def log_translation(
         log_file.write("Translated:\n" + translated_text + "\n")
         log_file.write("-" * 40 + "\n")
 
+
 def json_to_dict(json_string: str) -> dict:
     """
     Converts a JSON string to a Python dictionary.
@@ -138,8 +142,9 @@ def json_to_dict(json_string: str) -> dict:
     try:
         return json.loads(json_string)
     except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON string: {e}")
-    
+        raise ValueError(f"Invalid JSON string: {e}") from e
+
+
 def dict_to_list(data_dict: dict) -> List[str]:
     """
     Converts a dictionary to a list of strings in the format "key: value".
@@ -149,3 +154,113 @@ def dict_to_list(data_dict: dict) -> List[str]:
         List[str]: The converted list of strings.
     """
     return [f"{key}: {value}" for key, value in data_dict.items()]
+
+# regex function to extract keywords from text
+
+
+def allcaps_keywords(text: str) -> List[str]:
+    """
+    Extracts all uppercase keywords from the text.
+    Args:
+        text (str): The input text to search in.
+    Returns:
+        List[str]: A list of unique uppercase keywords found in the text.
+    """
+    pattern = r"\b[A-Z]{2,}\b"
+    return define_keywords(text, pattern)
+
+
+def curly_braces_keywords(text: str) -> List[str]:
+    """
+    Extracts keywords surrounded by curly braces from the text.
+    Args:
+        text (str): The input text to search in.
+    Returns:
+        List[str]: A list of unique keywords found in the text.
+    """
+    pattern = r"\{.*?\}"
+    return define_keywords(text, pattern)
+
+
+def brackets_keywords(text: str) -> List[str]:
+    """
+    Extracts keywords surrounded by square brackets from the text.
+    Args:
+        text (str): The input text to search in.
+    Returns:
+        List[str]: A list of unique keywords found in the text.
+    """
+    pattern = r"\[.*?\]"
+    return define_keywords(text, pattern)
+
+
+def parentheses_keywords(text: str) -> List[str]:
+    """
+    Extracts keywords surrounded by parentheses from the text.
+    Args:
+        text (str): The input text to search in.
+    Returns:
+        List[str]: A list of unique keywords found in the text.
+    """
+    pattern = r"\(.*?\)"
+    return define_keywords(text, pattern)
+
+
+def barackets_keywords(text: str) -> List[str]:
+    """
+    Extracts keywords surrounded by angle brackets from the text.
+    Args:
+        text (str): The input text to search in.
+    Returns:
+        List[str]: A list of unique keywords found in the text.
+    """
+    pattern = r"<.*?>"
+    return define_keywords(text, pattern)
+
+
+def slash_keywords(text: str) -> List[str]:
+    """
+    Extracts keywords surrounded by slashes from the text.
+    Args:
+        text (str): The input text to search in.
+    Returns:
+        List[str]: A list of unique keywords found in the text.
+    """
+    pattern = r"/.*?/"
+    return define_keywords(text, pattern)
+
+
+def backslash_keywords(text: str) -> List[str]:
+    """
+    Extracts keywords surrounded by backslashes from the text.
+    Args:
+        text (str): The input text to search in.
+    Returns:
+        List[str]: A list of unique keywords found in the text.
+    """
+    pattern = r"\\.*?\\"
+    return define_keywords(text, pattern)
+
+
+def underscore_keywords(text: str) -> List[str]:
+    """
+    Extracts keywords surrounded by underscores from the text.
+    Args:
+        text (str): The input text to search in.
+    Returns:
+        List[str]: A list of unique keywords found in the text.
+    """
+    pattern = r"_(.*?)_"
+    return define_keywords(text, pattern)
+
+
+def semicolon_keywords(text: str) -> List[str]:
+    """
+    Extracts keywords surrounded by semicolons from the text.
+    Args:
+        text (str): The input text to search in.
+    Returns:
+        List[str]: A list of unique keywords found in the text.
+    """
+    pattern = r";(.*?);"
+    return define_keywords(text, pattern)
