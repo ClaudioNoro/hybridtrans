@@ -28,9 +28,9 @@ def get_translator(
         ) -> BaseTranslator:
     """
     Returns a translator instance based on the selected mode.
-    - "online": uses Google Translate
-    - "offline": uses Argos Translate
-    - "auto": checks internet connection and selects accordingly
+    - `Typetranslator.ONLINE`: uses Google Translate
+    - `Typetranslator.OFFLINE`: uses Argos Translate
+    - `Typetranslator.AUT`: checks internet connection and selects accordingly
     """
     if mode == Typetranslator.ONLINE:
         return GoogleTranslator()

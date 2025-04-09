@@ -30,6 +30,22 @@ class BaseTranslator(ABC):
         FRENCH = "fr"
 
     @abstractmethod
+    def __init__(self, source_lang: TypeLanguage, target_lang: TypeLanguage, text: str = "", keywords: List[str] = None):
+        """
+        Initialize the BaseTranslator with source language, target language, text, and keywords.
+
+        Args:
+            source_lang (TypeLanguage): The source language code (e.g., 'ENGLISH').
+            target_lang (TypeLanguage): The target language code (e.g., 'PORTUGUESE').
+            text (str): The text to translate (default is an empty string).
+            keywords (List[str]): A list of keywords to protect (default is None).
+        """
+        self.source_lang = source_lang
+        self.target_lang = target_lang
+        self.text = text
+        self.translated_text = ""
+        self.keywords = keywords or []
+
     def translate(
         self, text: str, source_lang: TypeLanguage, target_lang: TypeLanguage
     ) -> str:

@@ -22,7 +22,7 @@ class GoogleTranslator(BaseTranslator):
 
     class TypeLanguage(StrEnum):
         """ Enum for language types.
-        
+
         StrEnum:
         --------
         - `ENGLISH`: English
@@ -65,8 +65,7 @@ class GoogleTranslator(BaseTranslator):
             # Validate inputs
             if not text:
                 raise ValueError(
-                    "The text to translate cannot be None or empty."
-                    )
+                    "The text to translate cannot be None or empty.")
             if not source_lang:
                 raise ValueError("The source language cannot be None.")
             if not target_lang:
@@ -87,8 +86,7 @@ class GoogleTranslator(BaseTranslator):
             # Translate each segment
             for segment in segments:
                 result = self._translator.translate(
-                    segment, src=self._source_lang, dest=self._target_lang
-                    )
+                    segment, src=self._source_lang, dest=self._target_lang)
                 translated_segments.append(result.text)
 
             # Combine translated segments
@@ -96,8 +94,7 @@ class GoogleTranslator(BaseTranslator):
 
             # Restore keywords
             self._translated_text = self._restore_keywords(
-                translated_text, self._keywords
-                )
+                translated_text, self._keywords)
             return self._translated_text
 
         except Exception as e:

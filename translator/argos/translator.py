@@ -77,8 +77,7 @@ class ArgosTranslator(BaseTranslator):
             # Validate inputs
             if not text:
                 raise ValueError(
-                    "The text to translate cannot be None or empty."
-                    )
+                    "The text to translate cannot be None or empty.")
             if not source_lang:
                 raise ValueError("The source language cannot be None.")
             if not target_lang:
