@@ -1,128 +1,138 @@
-""" Module for Google Translate API integration.
-This module provides a class for translating text using the \
-      Google Translate API.
-It includes methods for translating text, detecting language,\
-      and handling exceptions.
-It also provides functionality to protect specific keywords from translation.
 """
-from enum import StrEnum
-import re
+Main module for Google Translate.
+Provides an implementation of BaseTranslator using googletrans.
+"""
+
+from functools import lru_cache
+import time
 from typing import List
+import re
+from textblob import TextBlob
 from googletrans import Translator
 from translator.BaseTranslator import BaseTranslator
 
-from textblob import TextBlob
-
 
 class GoogleTranslator(BaseTranslator):
+    """A translator class that uses the Google Translate API
+    Args:
+        BaseTranslator (class): Base class for translation
     """
-    A translator class that uses the Google Translate API with\
-    integrated text handling.
-    """
 
-    class TypeLanguage(StrEnum):
-        """ Enum for language types.
-
-        StrEnum:
-        --------
-        - `ENGLISH`: English
-        - `PORTUGUESE`: Portuguese
-        - `SPANISH`: Spanish
-        - `FRENCH`: French
-        """
-        # Enum for language types
-        ENGLISH = "en"
-        PORTUGUESE = "pt"
-        SPANISH = "es"
-        FRENCH = "fr"
-
-        @classmethod
-        def get_all_languages(cls) -> list[str]:
-            """Returns all supported languages as a list of strings."""
-            return [lang.value for lang in cls]
-
-    def __init__(self) -> None:
-        """Initializes the GoogleTranslator instance."""
+    def __init__(self, source_lang=None, target_lang=None, text=""):
+        super().__init__(source_lang, target_lang, text)
         self._translator = Translator()
-        self._source_lang = None
-        self._target_lang = None
-        self._text = None
-        self._translated_text = None
-        self._keywords = []  # Store user-defined keywords
 
     def set_keywords(self, keywords: List[str]) -> None:
-        """Allows the user to define keywords to protect during translation.
+        """Define keywords to protect during translation.
 
         Args:
             keywords (List[str]): A list of keywords to protect.
         """
-        self._keywords = keywords
+        self.keywords = keywords
 
-    def translate(self, text: str, source_lang: TypeLanguage,
-                  target_lang: TypeLanguage) -> str:
-        """Translates text from the source language to the target language."""
+    @lru_cache(maxsize=128)
+    def translate(self, text: str, source_lang: str, target_lang: str) -> str:
+        """Translates text from source_lang to target_lang.
+
+        Args:
+            text (str): The text to translate.
+            source_lang (str): The source language code (e.g., 'en').
+            target_lang (str): The target language code (e.g., 'pt').
+
+        Returns:
+            str: The translated text.
+
+        Raises:
+            ValueError: If the translation fails or returns an empty response.
+        """
         try:
-            # Validate inputs
-            if not text:
-                raise ValueError(
-                    "The text to translate cannot be None or empty.")
-            if not source_lang:
-                raise ValueError("The source language cannot be None.")
-            if not target_lang:
-                raise ValueError("The target language cannot be None.")
+            self.text = text
+            self.source_lang = source_lang
+            self.target_lang = target_lang
 
-            # Set private variables
-            self._text = text
-            self._source_lang = source_lang
-            self._target_lang = target_lang
-
-            # Protect keywords
-            protected_text = self._protect_keywords(self._text, self._keywords)
-
-            # Segment text
+            protected_text = self._protect_keywords(text, self.keywords)
             segments = self._segment_text(protected_text, 100)
             translated_segments = []
 
-            # Translate each segment
             for segment in segments:
-                result = self._translator.translate(
-                    segment, src=self._source_lang, dest=self._target_lang)
+                # result = self._translator.translate(segment, src=source_lang, dest=target_lang)
+                star_time = time.time()
+                result = self.private_translate(segment, source_lang, target_lang)
+                end_time = time.time()
+                print(f"-> {end_time - star_time:.2f} seconds")
+                if result is None or not hasattr(result, "text"):
+                    raise ValueError("Translation failed: Empty or malformed response.")
                 translated_segments.append(result.text)
 
-            # Combine translated segments
             translated_text = " ".join(translated_segments)
-
-            # Restore keywords
-            self._translated_text = self._restore_keywords(
-                translated_text, self._keywords)
-            return self._translated_text
+            self.translated_text = self._restore_keywords(translated_text, self.keywords)
+            return self.translated_text
 
         except Exception as e:
             self.handle_exceptions(e)
             return "[ERROR] Translation failed."
 
+    @lru_cache(maxsize=128)
+    def private_translate(self, text: str, source_lang: str, target_lang: str) -> str:
+        """Private method to translate text using Google Translate.
+
+        Args:
+            text (str): The text to translate.
+            source_lang (str): The source language code (e.g., 'en').
+            target_lang (str): The target language code (e.g., 'pt').
+
+        Returns:
+            str: The translated text.
+        """
+        return self._translator.translate(text, target_lang, source_lang)
+
     def detect_language(self, text: str) -> str:
-        """Detects the language of the input text."""
+        """Detects the language of the input text.
+
+        Args:
+            text (str): The text whose language is to be detected.
+
+        Returns:
+            str: The detected language code (e.g., 'en' for English).
+
+        Raises:
+            ValueError: If the language detection fails or returns an empty response.
+        """
         try:
-            self._text = text
-            result = self._translator.detect(self._text)
+            result = self._translator.detect(text)
             return result.lang
         except Exception as e:
             self.handle_exceptions(e)
-            return "unknown"
+            return None
 
-    # Private methods for text handling
+    def handle_exceptions(self, exception):
+        """Handles exceptions raised by the Google Translate API."""
+        print(f"An error occurred: {exception}")
+        raise exception
 
     def _segment_text(self, text: str, max_sentences: int = 100) -> List[str]:
-        """Segments a block of text into a list of sentences."""
+        """Splits the text into sentences for more reliable translation.
+
+        Args:
+            text (str): The text to segment.
+            max_sentences (int): The maximum number of sentences to return.
+
+        Returns:
+            List[str]: A list of sentences.
+        """
         blob = TextBlob(text)
-        sentences = [str(sentence) for sentence in blob.sentences]
+        sentences = [str(sentence) for sentence in blob.sentences]  # virar lista de strings!!!!!!!!!!!!
         return sentences[:max_sentences]
 
     def _protect_keywords(self, text: str, keywords: List[str]) -> str:
-        """
-        Replaces each keyword with a numbered \
-        placeholder to prevent translation.
+        """Replaces each keyword with a numbered placeholder.
+
+        Args:
+            text (str): The text to process.
+            keywords (List[str]): A list of keywords to protect.
+
+        Returns:
+            str: Text with keywords replaced.
         """
         for idx, keyword in enumerate(keywords, start=1):
             placeholder = f"__{idx}__"
@@ -130,13 +140,16 @@ class GoogleTranslator(BaseTranslator):
         return text
 
     def _restore_keywords(self, text: str, keywords: List[str]) -> str:
-        """Replaces numbered placeholders with the original keywords."""
+        """Restores original keywords in place of placeholders.
+
+        Args:
+            text (str): The translated text.
+            keywords (List[str]): The list of original keywords.
+
+        Returns:
+            str: The text with keywords restored.
+        """
         for idx, keyword in enumerate(keywords, start=1):
             pattern = re.compile(rf"__{idx}__")
             text = pattern.sub(keyword, text)
         return text
-
-    def handle_exceptions(self, exception):
-        """Handles exceptions raised by the Google Translate API."""
-        print(f"An error occurred: {exception}")
-        raise exception

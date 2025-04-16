@@ -1,4 +1,24 @@
+""" Setup script for the hybrid translation library using Google Translate and Argos Translate."""
+import sys
+import subprocess
 from setuptools import setup, find_packages
+from setuptools.command.install import install
+
+
+class PostInstallCommand(install):
+    """Post-installation for installation mode."""
+
+    def run(self):
+        install.run(self)
+        try:
+            subprocess.check_call([sys.executable, "postinstall.py"])
+        except Exception as e:
+            print(f"Post-install script failed: {e}")
+
+
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
+
 
 setup(
     name='hybridlibtest',
@@ -6,7 +26,7 @@ setup(
     author='Claudio Filho',
     author_email='cg-filho@criticalsoftware.com',
     description='Hybrid translation library using Google Translate and Argos Translate',
-    long_description=open("README.md", encoding="utf-8").read(),
+    long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(include=["translator", "translator.*"]),
     install_requires=[
@@ -94,7 +114,8 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "translate=translator.main:main"
+            "translate=translator.main:main",
+            "install-argos-models=translator.utils.argos_installer:install_languages_from_config"  # install-argos-models is the command to run the installer
         ]
     },
     classifiers=[
@@ -103,4 +124,7 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.11",
+    cmdclass={
+        "install": PostInstallCommand,
+    },
 )

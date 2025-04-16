@@ -1,13 +1,19 @@
 """
 Base class for translation services.
-This module defines the `BaseTranslator` class, which serves as an \
+This module defines the `BaseTranslator` class, which serves as an
     abstract base
-class for all translation services. It provides a common interface for \
+class for all translation services. It provides a common interface for
 translating text, detecting languages, and handling keywords.
 """
+
 from abc import ABC, abstractmethod
 from enum import StrEnum
-from typing import List
+from typing import List, Union
+from translator.utils.handletext import (
+    extract_keywords,
+    protect_keywords,
+    restore_keywords,
+)
 
 
 class BaseTranslator(ABC):
@@ -22,15 +28,23 @@ class BaseTranslator(ABC):
         - `PORTUGUESE`: Portuguese
         - `SPANISH`: Spanish
         - `FRENCH`: French
+        - `DEFAULT`: Default language (English)
         """
 
         ENGLISH = "en"
         PORTUGUESE = "pt"
         SPANISH = "es"
         FRENCH = "fr"
+        DEFAULT = ENGLISH
 
     @abstractmethod
-    def __init__(self, source_lang: TypeLanguage, target_lang: TypeLanguage, text: str = "", keywords: List[str] = None):
+    def __init__(
+        self,
+        source_lang: TypeLanguage,
+        target_lang: TypeLanguage,
+        text: str = "",
+        keywords: List[str] = None,
+    ):
         """
         Initialize the BaseTranslator with source language, target language, text, and keywords.
 
@@ -92,46 +106,37 @@ class BaseTranslator(ABC):
                 BaseTranslator"
         )
 
-    @abstractmethod
-    def translate_sentence(
-        self, sentence: str, source_lang: TypeLanguage,
-        target_lang: TypeLanguage
-    ) -> str:
-        """Translate a sentence to the target language.
+    def translate_json(self, json_data: dict[str, Union[str, int]]) -> dict[str, Union[str, int]]:
+        """
+        Translates the string values of a JSON-like dictionary in memory.
 
         Args:
-            sentence (str): The sentence to translate.
-            source_lang (TypeLanguage): The source language code (e.g., \
-                'ENGLISH').
-            target_lang (TypeLanguage): The target language code (e.g., \
-                'PORTUGUESE').
+          json_data (dict[str, [str, int]]): A dictionary with string values to be translated.
 
         Returns:
-            str: The translated sentence.
+            dict[str, [str, int]]: A dictionary with translated string values.
         """
-        raise NotImplementedError(
-            "translate_sentence() must be implemented by subclasses of \
-                BaseTranslator"
-        )
+        translated_data = {}
 
-    @abstractmethod
-    def translate_json(
-        self, json_path: str, source_lang: TypeLanguage,
-        target_lang: TypeLanguage
-    ) -> str:
-        """Translate a JSON object from source_lang to target_lang.
+        for key, value in json_data.items():
+            if isinstance(value, str):
+                protected = protect_keywords(value, self.keywords)
+                translated = self.translate(
+                    protected, self.source_lang, self.target_lang
+                )
+                restored = restore_keywords(translated, self.keywords)
+                translated_data[key] = restored
+            else:
+                translated_data[key] = value  # keep as-is if not string
+
+        return translated_data
+
+    def set_keywords_from_text(self, text: str, method: str = "curly") -> None:
+        """
+        Extracts and sets self._keywords using a regex pattern method.
 
         Args:
-            json_path (str): The JSON file path to translate.
-            source_lang (TypeLanguage): The source language code \
-                (e.g., 'ENGLISH').
-            target_lang (TypeLanguage): The target language code \
-                (e.g., 'PORTUGUESE').
-
-        Returns:
-            str: The translated JSON object.
+            text (str): The input text containing keywords to extract.
+            method (str): Extraction method (e.g., 'curly', 'brackets', 'allcaps', etc.).
         """
-        raise NotImplementedError(
-            "translate_json() must be implemented by subclasses of \
-                BaseTranslator"
-        )
+        self.keywords = extract_keywords(text, method)

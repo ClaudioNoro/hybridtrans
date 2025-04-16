@@ -1,7 +1,8 @@
 """Text handling utilities for translation tasks."""
+
 import json
 import re
-from typing import List
+from typing import List, Literal
 from textblob import TextBlob
 
 
@@ -23,7 +24,7 @@ def read_file(file_path: str) -> str:
 
 
 def define_keywords(text: str, pattern: str) -> List[str]:
-    """
+    r"""
     Extracts keywords from text using a regular expression pattern.
 
     Args:
@@ -108,8 +109,7 @@ def normalize_text(text: str) -> str:
 
 
 def log_translation(
-    original_text: str, translated_text: str,
-    log_path: str = "translation_log.txt"
+    original_text: str, translated_text: str, log_path: str = "translation_log.txt"
 ) -> None:
     """
     Appends original and translated text to a log file.
@@ -155,112 +155,83 @@ def dict_to_list(data_dict: dict) -> List[str]:
     """
     return [f"{key}: {value}" for key, value in data_dict.items()]
 
+
 # regex function to extract keywords from text
 
-
-def allcaps_keywords(text: str) -> List[str]:
+def extract_keywords(text: str, method: Literal[
+    "allcaps", "curly", "brackets", "parentheses", "barackets", "slash",
+    "underscore", "semicolon", "pipe", "percent", "dollar", "ampersand", "at",
+    "caret", "exclamation", "tilde", "hash", "backtick", "plus", "minus",
+    "dot", "comma", "question", "asterisk", "double_quotes", "single_quotes",
+    "curly_quotes"
+]) -> List[str]:
     """
-    Extracts all uppercase keywords from the text.
+    Extracts keywords from text based on the selected method.
     Args:
         text (str): The input text to search in.
-    Returns:
-        List[str]: A list of unique uppercase keywords found in the text.
+        method (str): The method for keyword extraction. Options include:
+            - "allcaps": Extracts all-uppercase words. (eg. ADMIN, GUEST)
+            - "curly": Extracts text within curly braces. (eg. {example})
+            - "brackets": Extracts text within square brackets. (eg. [example])
+            - "parentheses": Extracts text within parentheses. (eg. (example))
+            - "barackets": Extracts text within angle brackets. (eg. <example>)
+            - "slash": Extracts text within slashes. (eg. /example/)
+            - "underscore": Extracts text within underscores. (eg. _example_)
+            - "semicolon": Extracts text within semicolons. (eg. ;example;)
+            - "pipe": Extracts text within pipes. (eg. |example|)
+            - "percent": Extracts text within percent signs. (eg. %example%)
+            - "dollar": Extracts text within dollar signs. (eg. $example$)
+            - "ampersand": Extracts text within ampersands. (eg. &example&)
+            - "at": Extracts text within at symbols. (eg. @example@)
+            - "caret": Extracts text within caret symbols. (eg. ^example^)
+            - "exclamation": Extracts text between exclamation marks. (eg. !example!)
+            - "tilde": Extracts text within tildes. (eg. ~example~)
+            - "hash": Extracts text within hash symbols. (eg. #example#)
+            - "backtick": Extracts text within backticks. (eg. `example`)
+            - "plus": Extracts text between plus signs. (eg. +example+)
+            - "minus": Extracts text between minus signs. (eg. -example-)
+            - "dot": Extracts text between dots. (eg. .example.)
+            - "comma": Extracts text between commas. (eg. ,example,)
+            - "question": Extracts text between question marks. (eg. ?example?)
+            - "asterisk": Extracts text between asterisks. (eg. *example*)
+            - "double_quotes": Extracts text within double quotes. (eg. "example")
+            - "single_quotes": Extracts text within single quotes. (eg. 'example')
+            - "curly_quotes": Extracts text within curly quotes. (eg. “example” or ”example”)
+        Returns:
+            List[str]: A list of unique keywords found in the text.
     """
-    pattern = r"\b[A-Z]{2,}\b"
-    return define_keywords(text, pattern)
+    pattern_map = {
+        "allcaps": r"\b[A-Z]{2,}\b",
+        "curly": r"\{.*?\}",
+        "brackets": r"\[.*?\]",
+        "parentheses": r"\(.*?\)",
+        "barackets": r"<.*?>",
+        "slash": r"/.*?/",
+        "underscore": r"_.*?_",
+        "semicolon": r";.*?;",
+        "pipe": r"\|.*?\|",
+        "percent": r"%.*?%",
+        "dollar": r"\$.*?\$",
+        "ampersand": r"&.*?&",
+        "at": r"@.*?@",
+        "caret": r"\^.*?\^",
+        "exclamation": r"!.+?!",
+        "tilde": r"~.*?~",
+        "hash": r"#.*?#",
+        "backtick": r"`.*?`",
+        "plus": r"\+.*?\+",
+        "minus": r"-.*?-",
+        "dot": r"\..*?\.",
+        "comma": r",.*?,",
+        "question": r"\?.*?\?",
+        "asterisk": r"\*.*?\*",
+        "double_quotes": r"\".*?\"",
+        "single_quotes": r"'.*?'",
+        "curly_quotes": r"[“”](.*?)[“”]",
+    }
 
-
-def curly_braces_keywords(text: str) -> List[str]:
-    """
-    Extracts keywords surrounded by curly braces from the text.
-    Args:
-        text (str): The input text to search in.
-    Returns:
-        List[str]: A list of unique keywords found in the text.
-    """
-    pattern = r"\{.*?\}"
-    return define_keywords(text, pattern)
-
-
-def brackets_keywords(text: str) -> List[str]:
-    """
-    Extracts keywords surrounded by square brackets from the text.
-    Args:
-        text (str): The input text to search in.
-    Returns:
-        List[str]: A list of unique keywords found in the text.
-    """
-    pattern = r"\[.*?\]"
-    return define_keywords(text, pattern)
-
-
-def parentheses_keywords(text: str) -> List[str]:
-    """
-    Extracts keywords surrounded by parentheses from the text.
-    Args:
-        text (str): The input text to search in.
-    Returns:
-        List[str]: A list of unique keywords found in the text.
-    """
-    pattern = r"\(.*?\)"
-    return define_keywords(text, pattern)
-
-
-def barackets_keywords(text: str) -> List[str]:
-    """
-    Extracts keywords surrounded by angle brackets from the text.
-    Args:
-        text (str): The input text to search in.
-    Returns:
-        List[str]: A list of unique keywords found in the text.
-    """
-    pattern = r"<.*?>"
-    return define_keywords(text, pattern)
-
-
-def slash_keywords(text: str) -> List[str]:
-    """
-    Extracts keywords surrounded by slashes from the text.
-    Args:
-        text (str): The input text to search in.
-    Returns:
-        List[str]: A list of unique keywords found in the text.
-    """
-    pattern = r"/.*?/"
-    return define_keywords(text, pattern)
-
-
-def backslash_keywords(text: str) -> List[str]:
-    """
-    Extracts keywords surrounded by backslashes from the text.
-    Args:
-        text (str): The input text to search in.
-    Returns:
-        List[str]: A list of unique keywords found in the text.
-    """
-    pattern = r"\\.*?\\"
-    return define_keywords(text, pattern)
-
-
-def underscore_keywords(text: str) -> List[str]:
-    """
-    Extracts keywords surrounded by underscores from the text.
-    Args:
-        text (str): The input text to search in.
-    Returns:
-        List[str]: A list of unique keywords found in the text.
-    """
-    pattern = r"_(.*?)_"
-    return define_keywords(text, pattern)
-
-
-def semicolon_keywords(text: str) -> List[str]:
-    """
-    Extracts keywords surrounded by semicolons from the text.
-    Args:
-        text (str): The input text to search in.
-    Returns:
-        List[str]: A list of unique keywords found in the text.
-    """
-    pattern = r";(.*?);"
+    pattern = pattern_map.get(method)
+    if not pattern:
+        raise ValueError(f"Invalid keyword extraction method: {method}")
+    
     return define_keywords(text, pattern)

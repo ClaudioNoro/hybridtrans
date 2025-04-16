@@ -18,7 +18,7 @@ def is_connected(timeout=3) -> bool:
             False
     """
     try:
-        requests.get("https://www.google.com", timeout=timeout) #hardcoded, virar variavel global
+        requests.get("https://www.google.com", timeout=timeout)  # hardcoded, virar variavel global
         return True
     except requests.RequestException:
         return False

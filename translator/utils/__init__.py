@@ -9,7 +9,8 @@ from .handletext import (
     restore_keywords,
     normalize_text,
     log_translation,
-    define_keywords
+    define_keywords,
+    extract_keywords
 )
 from .network import is_connected
 
@@ -21,5 +22,6 @@ __all__ = [
     "normalize_text",
     "log_translation",
     "is_connected",
-    "define_keywords"
+    "define_keywords",
+    "extract_keywords"
 ]

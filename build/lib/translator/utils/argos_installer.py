@@ -110,7 +110,7 @@ def install_languages_from_config() -> None:
     package.update_package_index()
 
     available_packages = package.get_available_packages()
-    installed_codes = [lang.code for lang in translate.get_installed_languages()]  # type: ignore
+    installed_codes = [lang.code for lang in translate.get_installed_languages()]
     total_installed = 0
 
     for pkg in available_packages:

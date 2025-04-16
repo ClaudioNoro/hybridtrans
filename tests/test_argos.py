@@ -10,8 +10,8 @@ class TestArgosTranslator(unittest.TestCase):
     def test_translate_valid_languages(self):
         """Test translation with valid source and target languages."""
         text = "Hello"
-        source_lang = "en"  # English
-        target_lang = "es"  # Spanish
+        source_lang = self.translator.TypeLanguage.ENGLISH  # English
+        target_lang = self.translator.TypeLanguage.SPANISH  # Spanish
         translated_text = self.translator.translate(text, source_lang, target_lang)
         self.assertIsInstance(translated_text, str)
         self.assertNotEqual(translated_text, text)  # Ensure translation occurred

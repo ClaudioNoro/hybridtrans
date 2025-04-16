@@ -4,7 +4,7 @@ from translator.googletrans.utils import log_translation
 
 def run_translator():
     """
-    Executa o tradutor Google Translate via CLI.
+    Run the Google Translator CLI.
     """
     translator = GoogleTranslator()
 

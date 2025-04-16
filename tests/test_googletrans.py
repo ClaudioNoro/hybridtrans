@@ -1,87 +1,44 @@
 import unittest
-from translator.googletrans.translator import (
-    initialize_translator,
-    translate_word,
-    translate_sentence,
-)
+from translator.googletrans.translator import GoogleTranslator
 
 
 class TestGoogleTranslator(unittest.TestCase):
     def setUp(self):
-        """Set up the GoogleTranslator instance before each test."""
-        self.translator = initialize_translator()
+        self.translator = GoogleTranslator()
+        self.translator.source_lang = "pt"
+        self.translator.target_lang = "en"
 
-    def test_translate_valid_word(self):
-        """Test translation of a single valid word."""
-        print("test_translate_valid_word")
-        word = "Hello"
-        source_lang = "en"  # English
-        target_lang = "es"  # Spanish
-        translated_word = translate_word(
-            self.translator, word, source_lang, target_lang
-        )
-        self.assertIsInstance(translated_word, str)
-        self.assertNotEqual(translated_word, word)  # Ensure translation occurred
+    def test_basic_translation(self):
+        result = self.translator.translate("Olá mundo", "pt", "en")
+        self.assertIsInstance(result, str)
+        self.assertNotEqual(result.lower(), "olá mundo")
 
-    def test_translate_valid_sentence(self):
-        """Test translation of a valid sentence."""
-        print("test_translate_valid_sentence")
-        sentence = "How are you?"
-        source_lang = "en"  # English
-        target_lang = "es"  # Spanish
-        translated_sentence = translate_sentence(
-            self.translator, sentence, source_lang, target_lang
-        )
-        self.assertIsInstance(translated_sentence, str)
-        self.assertNotEqual(
-            translated_sentence, sentence
-        )  # Ensure translation occurred
+    def test_translation_with_keywords(self):
+        text = "Olá, {USUARIO}!"
+        self.translator.set_keywords(["{USUARIO}"])
+        result = self.translator.translate(text, "pt", "en")
+        self.assertIn("{USUARIO}", result)
 
-    def test_translate_invalid_language_code(self):
-        """Test translation with an invalid source language code."""
-        print("test_translate_invalid_language_code")
-        sentence = "Hello"
-        source_lang = "xx"  # Invalid language code
-        target_lang = "es"  # Spanish
-        with self.assertRaises(
-            Exception
-        ):  # Expecting an exception for invalid language code
-            translate_sentence(self.translator, sentence, source_lang, target_lang)
+    def test_detect_language(self):
+        lang = self.translator.detect_language("Bonjour le monde")
+        self.assertEqual(lang, "fr")
 
-    def test_translate_empty_text(self):
-        """Test translation of an empty string."""
-        print("test_translate_empty")
-        sentence = ""
-        source_lang = "en"  # English
-        target_lang = "es"  # Spanish
-        translated_sentence = translate_sentence(
-            self.translator, sentence, source_lang, target_lang
-        )
-        self.assertEqual(
-            translated_sentence, ""
-        )  # Empty input should return empty output
+    def test_translate_json(self):
+        data = {
+            "title": "Bem-vindo",
+            "button": "Clique aqui",
+            "value": 42 
+        }
+        self.translator.set_keywords([])
+        result = self.translator.translate_json(data)
+        self.assertIsInstance(result["title"], str)
+        self.assertEqual(result["value"], 42)
 
-    def test_translate_large_text(self) -> None:
-        print("test_translate_large_text")
-        """Test translation of a large text."""
-        sentence = "Hello " * 1000  # Large input text
-        source_lang = "en"  # English
-        target_lang = "es"  # Spanish
-        translated_sentence = translate_sentence(
-            self.translator, sentence, source_lang, target_lang
-        )
-        self.assertIsInstance(translated_sentence, str)
-        self.assertNotEqual(
-            translated_sentence, sentence
-        )  # Ensure translation occurred
-
-    def test_translate_with_keywords(self):
-        text = "Hello admin and guest"
-        keywords = ["admin", "guest"]
-        result = self.translator.translate(text, "en", "pt", keywords=keywords)
-        self.assertIn("admin", result)
-        self.assertIn("guest", result)
-        self.assertNotIn("__1__", result)
+    def test_translation_of_long_text(self):
+        long_text = ("Olá, mundo! " * 100).strip()
+        result = self.translator.translate(long_text, "pt", "en")
+        self.assertIsInstance(result, str)
+        self.assertNotIn("Olá", result)
 
 
 if __name__ == "__main__":

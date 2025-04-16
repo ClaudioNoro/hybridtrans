@@ -24,8 +24,7 @@ class Typetranslator(StrEnum):
 
 
 def get_translator(
-        mode: Typetranslator = Typetranslator.AUTO
-        ) -> BaseTranslator:
+        mode: Typetranslator = Typetranslator.AUTO) -> BaseTranslator:
     """
     Returns a translator instance based on the selected mode.
     - `Typetranslator.ONLINE`: uses Google Translate
